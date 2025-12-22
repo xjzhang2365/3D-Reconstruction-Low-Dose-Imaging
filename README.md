@@ -12,4 +12,8 @@ Computational methods for extracting diagnostic information from dose-limited im
 - Advanced denoising (BM3D, dictionary learning)
 - Physics-based reconstruction with constraints
 - Bayesian parameter estimation
+<<<<<<< HEAD
 - Automated quality assessment
+=======
+- Automated quality assessment 
+>>>>>>> 0c5a1fdaac616ce7d948af96984752e42dc61160
