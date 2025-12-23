@@ -205,3 +205,26 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+# Custom additions for this project
+
+# Data files (keep only specific samples)
+data/raw/
+data/temp/
+*.mat
+!results/data/**/*.npy
+!results/data/**/*.csv
+
+# Large files
+*.h5
+*.hdf5
+*.xyz
+*.cif
+
+# Personal notes
+notes/
+scratch/
+original-materials/
+
+# OS specific
+Thumbs.db
+desktop.ini
