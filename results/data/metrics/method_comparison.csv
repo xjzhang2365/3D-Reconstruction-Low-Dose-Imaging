@@ -1,0 +1,6 @@
+method,accuracy_angstrom,dose_required,time_resolution_ms,images_required,requires_prior_knowledge
+Our Method,0.45,8×10³,1,1,No
+Standard SA,1.2,2×10⁴,10,1,No
+Exit Wave Recon.,0.8,5×10⁴,100,20,Yes
+Tilt Series,0.6,3×10⁴,50,30,No
+Deep Learning,0.9,1×10⁴,5,1,Yes

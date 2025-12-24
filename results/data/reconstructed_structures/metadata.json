@@ -1,0 +1,16 @@
+{
+  "experiment_info": {
+    "n_atoms": 747,
+    "dose_level": "8.0e3 e-/\u00c5\u00b2",
+    "acquisition_interval": "1ms",
+    "total_frames": 5
+  },
+  "reconstruction_accuracy": {
+    "rmsd_x": "0.08\u00c5",
+    "rmsd_y": "0.09\u00c5",
+    "rmsd_z": "0.45\u00c5",
+    "overall": "0.46\u00c5"
+  },
+  "description": "Sample reconstructed structures (format demonstration)",
+  "note": "Coordinates are in Angstroms. Z-axis is perpendicular to nominal graphene plane."
+}

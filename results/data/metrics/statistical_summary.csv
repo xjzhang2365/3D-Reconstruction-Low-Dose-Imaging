@@ -1,0 +1,7 @@
+metric,value,unit
+Total atoms analyzed,747.0,atoms
+Frames processed,50.0,frames
+Average SNR (input),3.2,ratio
+Average SNR (after preprocessing),8.5,ratio
+Success rate,96.0,%
+Mean convergence iterations,4.2,iterations
