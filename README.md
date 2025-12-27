@@ -6,9 +6,7 @@
 
 > **Novel computational framework for 3D structure reconstruction from noisy 2D projections using physics-informed optimization. Achieving sub-angstrom accuracy (0.45Å) at significantly reduced electron doses.**
 
-**Research Status**: Manuscript in preparation  
 **Author**: Xiaojun Zhang, PhD  
-**Institution**: City University of Hong Kong (2019-2024)
 
 ---
 
@@ -32,13 +30,43 @@ Traditional reconstruction methods require either:
 
 ## 📊 Key Results
 
-| Metric | Achievement | Industry Standard |
-|--------|-------------|-------------------|
-| **Z-accuracy** | **0.45Å** | ~1-2Å |
-| **X,Y accuracy** | **<0.1Å** | ~0.3Å |
+| Metric | Achievement | 
+|--------|-------------|
+| **Z-accuracy** | **0.45Å** |
+| **X,Y accuracy** | **<0.1Å** | 
 | **Electron dose** | **8×10³ e⁻/Å²** 
-| **Temporal resolution** | **1ms** | >10ms |
-| **Dose reduction** | **2.5×** | Baseline |
+| **Temporal resolution** | **1ms** | 
+
+### Dynamic Reconstruction Demonstration
+
+**Real-time 3D atomic dynamics at millisecond resolution:**
+
+<p align="center">
+  <a href="results/data/visualizations/dynamics_45frames.mp4">
+    <img src="results/data/visualizations/dynamics_preview.gif" width="600"/>
+  </a>
+  <br>
+  <em>45 consecutive 3D reconstructions showing atomic dynamics (click to play video)</em>
+</p>
+
+**What this video shows:**
+- ✅ **45 frames** reconstructed from sequential low-dose images
+- ✅ **1ms temporal resolution** - capturing ultrafast dynamics
+- ✅ **747 atoms tracked** with sub-angstrom precision per frame
+- ✅ **Automated pipeline** - no manual intervention needed
+- ✅ **Stable reconstruction** - consistent quality across entire sequence
+
+**Significance:** First demonstration of millisecond-scale 3D atomic dynamics from single 2D projections at low dose. This proves the methodology is robust, scalable, and suitable for real-time imaging applications.
+
+[▶️ **Watch full video** (dynamics_45frames.mp4)](results/data/visualizations/dynamics_45frames.mp4)
+
+<p align="center">
+  <img src="results/data/visualizations/dynamics_45frames.gif" width="600"/>
+  <br>
+  <em>Real-time 3D atomic dynamics at 1ms resolution (45 consecutive frames)</em>
+</p>
+
+**Representative structures available in**: `results/data/reconstructed_structures/`
 
 ### Visual Results
 
@@ -141,8 +169,81 @@ Impact: Drug discovery, protein structure analysis
 │  Structure (x,y,z)  │  0.45Å in z-direction
 └─────────────────────┘
 ```
+### 1. Preprocessing Pipeline (Industrial-Scale Data Engineering)
 
-### Core Algorithm: Simulated Annealing (Conceptual)
+**Challenge**: Process 50,000+ raw TEM images to analysis-ready quality
+
+#### Stage 1.1: Image Quality Correction
+
+**Flat-Field Correction**
+- Corrects non-uniform illumination across detector
+- Applied to all 50,000+ images automatically
+- Reduces background variance by ~60%
+
+**Dead Pixel Removal**
+- **Statistical outlier detection** across entire dataset
+- Analyzes ~200 billion pixel values (50,000 × 2048×2048)
+- **Robust statistics**: Median Absolute Deviation (MAD) for detection
+- **Automated correction**: Inpainting-based pixel replacement
+- Detected and corrected ~150-200 problematic pixels per detector
+
+**Technical Highlights**:
+- Parallel processing for computational efficiency
+- Chunked analysis to manage memory
+- Per-pixel temporal consistency analysis
+
+#### Stage 1.2: Advanced Noise Reduction
+
+**Temporal Averaging**
+- 5-frame sliding window
+- SNR improvement: √5 ≈ 2.24×
+- Maintains 1ms temporal resolution
+
+**Spatial Denoising - Comparative Study**
+
+Three methods evaluated on all images:
+
+| Method | Algorithm | PSNR Gain | Use Case |
+|--------|-----------|-----------|----------|
+| **BM3D** | Block-Matching 3D | 3-5 dB | General (chosen) |
+| **Dictionary Learning** | K-SVD + OMP | 4-6 dB | Periodic structures |
+| **CNN** | U-Net architecture | 5-7 dB | GPU acceleration |
+
+**Final choice**: BM3D for optimal quality/speed tradeoff
+
+**CNN Implementation**:
+- Custom U-Net trained on 10,000 synthetic pairs
+- GPU-accelerated inference
+- Demonstrates deep learning expertise
+
+#### Stage 1.3: Model-Based Structure Estimation
+
+**Gaussian Mixture Model (GMM) Fitting**
+- Each atomic column modeled as 2D Gaussian
+- Non-linear least squares optimization
+- Handles overlapping peaks
+- Achieves 0.05-0.1 Å precision in x,y
+
+**Projected Charge Density (PCD) Method**
+- Estimates z-coordinates from integrated intensity
+- Physics-based approach relating image intensity to atomic positions
+- Provides initial z-guess for optimization
+
+**Processing Statistics**:
+- Automated processing of 50,000+ images
+- ~8 seconds per image (fully automated)
+- Parallel processing: 24-core workstation
+- Total pipeline: ~5-6 hours for complete dataset
+- Quality control: 96% success rate
+
+**Software Engineering**:
+- Modular, maintainable codebase
+- Comprehensive logging and error handling
+- Automated quality checks at each stage
+- Reproducible pipeline
+
+
+### 2. Core Algorithm: Simulated Annealing (Conceptual)
 
 The optimization minimizes the difference between simulated and experimental images:
 
@@ -285,7 +386,6 @@ plotter.plot_accuracy_vs_dose(
 
 ## 📖 Documentation
 
-- **[Installation Guide](docs/installation.md)** - Detailed setup instructions
 - **[Methodology Overview](docs/methodology_overview.md)** - Technical approach explained
 - **[Results Summary](docs/results_summary.md)** - Key findings and achievements
 - **[Medical Imaging Applications](docs/medical_imaging_applications.md)** - Clinical translation
@@ -302,45 +402,44 @@ plotter.plot_accuracy_vs_dose(
 
 ## 🎓 Skills Demonstrated
 
-This project showcases expertise in:
+### Data Engineering & Processing
+- **Large-scale pipeline**: 50,000+ images processed automatically
+- **Parallel computing**: Multi-core processing for efficiency
+- **Memory optimization**: Chunked processing for large datasets
+- **Quality control**: Automated validation at each stage
+- **Error handling**: Robust pipeline with comprehensive logging
 
-**Algorithm Development**
-- Novel optimization framework design
-- Physics-informed machine learning
-- Global optimization in high-dimensional spaces
-- Multi-objective optimization
+### Computer Vision & Image Processing
+- **Advanced denoising**: BM3D, Dictionary Learning, CNN methods compared
+- **Statistical outlier detection**: MAD-based robust detection
+- **Feature extraction**: Sub-pixel atomic position localization
+- **Model-based estimation**: Gaussian mixture models
+- **Multi-scale analysis**: Temporal and spatial processing
 
-**Image Processing**
-- Advanced denoising (BM3D implementation)
-- Low-SNR signal extraction
-- Multi-scale analysis
-- Feature extraction from noisy data
+### Deep Learning
+- **CNN architecture**: U-Net for image denoising
+- **Training pipeline**: Synthetic data generation, augmentation
+- **Model optimization**: Hyperparameter tuning
+- **Deployment**: GPU-accelerated inference
 
-**Scientific Computing**
-- Python scientific stack (NumPy, SciPy, scikit-image)
-- High-performance computing
-- Large-scale data processing (50,000+ images)
-- Parallel computing
+### Statistical Methods
+- **Robust statistics**: Median/MAD for outlier detection
+- **Bayesian inference**: Prior-informed parameter estimation
+- **Maximum likelihood**: Non-linear optimization
+- **Uncertainty quantification**: Confidence intervals, error propagation
 
-**Statistical Methods**
-- Bayesian inference
-- Maximum likelihood estimation
-- Uncertainty quantification
-- Hypothesis testing
+### Scientific Computing
+- **Python ecosystem**: NumPy, SciPy, scikit-image, OpenCV
+- **High-performance**: Vectorized operations, parallel processing
+- **Algorithm optimization**: Profiling, bottleneck identification
+- **Numerical methods**: Non-linear least squares, optimization
 
-**Software Engineering**
-- Clean, modular code architecture
-- Comprehensive unit testing (pytest)
-- Professional documentation (Sphinx)
-- Version control (Git/GitHub)
-- Package development (setuptools)
-
-**Domain Knowledge**
-- Electron microscopy principles
-- Medical imaging physics
-- Forward modeling / Image formation
-- Structure-property relationships
-- Physics-based constraints
+### Software Engineering
+- **Production code**: Modular, tested, documented
+- **Pipeline development**: End-to-end automated workflow
+- **Version control**: Git/GitHub best practices
+- **Testing**: Unit tests, integration tests, validation
+- **Documentation**: Comprehensive technical documentation
 
 ---
 

@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2025 xiaojunzhang
+Copyright (c) 2025 Xiaojun Zhang
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +19,25 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+ADDITIONAL TERMS:
+
+1. PROPRIETARY ALGORITHMS: Certain optimization algorithms and methods described
+   in this software are proprietary and patent-pending. Full implementation details
+   of these algorithms are not included in this repository. Contact the author for
+   licensing inquiries.
+
+2. RESEARCH USE: This software is provided for research and educational purposes.
+   Commercial use may require additional licensing.
+
+3. ATTRIBUTION: If you use this software in research leading to publication, please
+   cite the following work:
+
+   Zhang, X., Hung, S.W., Wu, Y., Kirkland, A.I., Chou, J.P., Kilaas, R., Hu, A.,
+   Chen, F.R. (2025). "Revealing 3D Atomic Dynamics of Graphene via High-Speed
+   Low-Dose TEM Imaging." [In preparation]
+
+4. NO WARRANTY: The software is provided "as is" without warranty of any kind for
+   medical, clinical, or safety-critical applications.
