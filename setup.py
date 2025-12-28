@@ -7,7 +7,7 @@ from pathlib import Path
 
 # Read README
 readme_file = Path(__file__).parent / "README.md"
-long_description = readme_file.read_text() if readme_file.exists() else ""
+long_description = readme_file.read_text(encoding='utf-8') if readme_file.exists() else ""
 
 setup(
     name="reconstruction-low-dose",
@@ -18,19 +18,23 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/yourusername/3D-Reconstruction-Low-Dose-Imaging",
+    
+    # Find all packages in src directory
     packages=find_packages(where="src"),
     package_dir={"": "src"},
+    
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering :: Image Processing",
-        "Topic :: Scientific/Engineering :: Medical Science Apps.",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
     ],
+    
     python_requires=">=3.10",
+    
     install_requires=[
         "numpy>=1.24.0",
         "scipy>=1.10.0",
@@ -44,26 +48,15 @@ setup(
         "pandas>=2.0.0",
         "pillow>=10.0.0",
     ],
+    
     extras_require={
         "dev": [
             "pytest>=7.4.0",
             "pytest-cov>=4.1.0",
-            "black>=23.0.0",
-            "flake8>=6.0.0",
         ],
         "notebooks": [
             "jupyter>=1.0.0",
             "ipykernel>=6.25.0",
-            "ipywidgets>=8.1.0",
-        ],
-        "deep-learning": [
-            "torch>=2.0.0",
-            "torchvision>=0.15.0",
-        ],
-    },
-    entry_points={
-        "console_scripts": [
-            "reconstruct=examples.basic_usage:main",
         ],
     },
 )
