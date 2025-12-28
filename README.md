@@ -58,16 +58,6 @@ Traditional reconstruction methods require either:
 
 **Significance:** First demonstration of millisecond-scale 3D atomic dynamics from single 2D projections at low dose. This proves the methodology is robust, scalable, and suitable for real-time imaging applications.
 
-[▶️ **Watch full video** (dynamics_45frames.mp4)](results/data/visualizations/dynamics_45frames.mp4)
-
-<p align="center">
-  <img src="results/data/visualizations/dynamics_45frames.gif" width="600"/>
-  <br>
-  <em>Real-time 3D atomic dynamics at 1ms resolution (45 consecutive frames)</em>
-</p>
-
-**Representative structures available in**: `results/data/reconstructed_structures/`
-
 ### Visual Results
 
 <p align="center">
@@ -84,48 +74,6 @@ Traditional reconstruction methods require either:
 - ✅ Successfully captured **millisecond-scale structural dynamics** in real-time
 - ✅ Revealed correlation between **geometric curvature and electronic properties**
 
----
-
-## 💡 Medical Imaging Applications
-
-This framework addresses fundamental challenges in clinical imaging:
-
-| Challenge | Materials Science (My PhD) | Medical Imaging | Translation |
-|-----------|---------------------------|-----------------|-------------|
-| **Low SNR** | Low-dose TEM | Reduced-dose CT | ✅ Direct |
-| **3D from 2D** | Single projection | Limited angles | ✅ Same math |
-| **Real-time** | 1ms dynamics | Interventional procedures | ✅ Fast optimization |
-| **Validation** | MD constraints | Anatomical priors | ✅ Framework applies |
-
-### Specific Clinical Applications
-
-#### 1. **Low-Dose CT Reconstruction**
-```
-Problem: Standard CT → 3-10 mSv radiation per scan
-Our Approach: Reduce dose 60-70% while maintaining quality
-Impact: Safer imaging for pediatric, pregnant, frequent-screening patients
-```
-
-#### 2. **Limited-Angle Tomography**
-```
-Problem: Surgical/anatomical constraints limit viewing angles
-Our Approach: Reconstruct from incomplete angular sampling
-Impact: Diagnostic quality from <180° acquisition
-```
-
-#### 3. **Real-Time Interventional Imaging**
-```
-Problem: Need fast 3D updates during procedures
-Our Approach: Single-shot reconstruction in seconds
-Impact: Low-dose intraoperative guidance
-```
-
-#### 4. **Cryo-EM Structure Determination**
-```
-Problem: Electron beam damage limits resolution
-Our Approach: Accurate reconstruction from minimal dose
-Impact: Drug discovery, protein structure analysis
-```
 
 ---
 
