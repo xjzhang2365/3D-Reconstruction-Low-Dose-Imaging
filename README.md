@@ -3,7 +3,7 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![arXiv](https://img.shields.io/badge/arXiv-2604.07271-b31b1b.svg)](https://arxiv.org/abs/2604.07271)
 
-Physics-informed inverse-problem pipeline for reconstructing 3D atomic coordinates of free-standing graphene from single low-dose transmission electron microscopy (TEM) frames， combining contrast-aware statistical initialization with simulated annealing (SA) optimization and LAMMPS molecular-dynamics regularization.
+Physics-informed inverse-problem pipeline for reconstructing 3D atomic coordinates of free-standing graphene from single low-dose transmission electron microscopy (TEM) frames. Combines contrast-aware statistical initialization with simulated annealing (SA) optimization and LAMMPS molecular-dynamics regularization.
 
 **Paper:** [Physics-Informed 3D Atomic Reconstruction and Dynamics of Free-Standing Graphene from Single Low-Dose TEM Images](https://arxiv.org/abs/2604.07271) (arXiv:2604.07271). Reported accuracy: **σ_z = 0.45 Å** out-of-plane, at 8×10³ e⁻/Å² dose and 1 ms temporal resolution.
 
