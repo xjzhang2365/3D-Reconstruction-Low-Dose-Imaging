@@ -336,4 +336,5 @@ pip install -r requirements.txt
 
 ## License and Contact
 
-See `LICENSE` for code license terms. Questions, issues, and collaboration inquiries welcome via GitHub Issues or email (xzhang2365@gmail.com).
+
+See `LICENSE` for code license terms. Questions, issues, and collaboration inquiries welcome via GitHub Issues or email (xzhang2365@gmail.com).   
