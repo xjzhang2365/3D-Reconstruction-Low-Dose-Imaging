@@ -1,0 +1,56 @@
+# Bytecode and Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Test, coverage, and type-check caches
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.hypothesis/
+
+# Build and packaging artifacts
+build/
+dist/
+*.egg-info/
+*.egg
+pip-wheel-metadata/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Generated outputs and experiment runs
+outputs/
+runs/
+
+# Local scratch files and logs
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Data policy
+# Real experimental TEM frames are not distributed with this repository.
+data/experimental/
+data/raw/
+data/preprocessed/
+.claude/ 

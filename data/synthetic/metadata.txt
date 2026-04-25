@@ -1,0 +1,8 @@
+This is my real simulated TEM case for Stage 2 z benchmarking.
+The image is generated from my own simulation pipeline, not the Codex toy benchmark.
+Ground truth xyz is included.
+Use this case to evaluate raw PCD z initialization only.
+especially, the "img_noisy.tif" is the simulated image with noise, and the 
+other image is without noisy. 
+We should use the noisy one, and the pdb file is the x, y and z positions 
+of ground truth model.

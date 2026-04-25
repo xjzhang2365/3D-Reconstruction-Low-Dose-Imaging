@@ -1,0 +1,77 @@
+{
+  "recommended_stage3_target": "data/simulated/target_preprocessed_like_raw21.npy",
+  "inputs": {
+    "pdb_path": "data/simulated/ground_xyz.pdb",
+    "raw_reference_image": {
+      "path": "data/raw/raw_21.tif",
+      "stats": {
+        "shape": [
+          256,
+          256
+        ],
+        "dtype": "uint16",
+        "min": 51.0,
+        "max": 499.0,
+        "mean": 265.620849609375,
+        "std": 99.6232180080043
+      }
+    }
+  },
+  "outputs": {
+    "clean_simulated_image": {
+      "path": "data/simulated/target_clean_abtem.tif",
+      "stats": {
+        "shape": [
+          256,
+          256
+        ],
+        "dtype": "float32",
+        "min": 0.8838817477226257,
+        "max": 1.175463318824768,
+        "mean": 0.9999579590948997,
+        "std": 0.05584328680548135
+      }
+    },
+    "noisy_simulated_image": {
+      "path": "data/simulated/target_noisy_like_raw21.tif",
+      "stats": {
+        "shape": [
+          256,
+          256
+        ],
+        "dtype": "float32",
+        "min": -72.37661743164062,
+        "max": 646.0355834960938,
+        "mean": 265.4961894508365,
+        "std": 99.66764206477002
+      }
+    },
+    "preprocessed_simulated_image": {
+      "path": "data/simulated/target_preprocessed_like_raw21.npy",
+      "stats": {
+        "shape": [
+          256,
+          256
+        ],
+        "dtype": "float64",
+        "min": 84.49273403695663,
+        "max": 641.5480813177365,
+        "mean": 337.63913455564534,
+        "std": 88.66509652955355
+      }
+    }
+  },
+  "simulation": {
+    "abtem_energy_ev": 80000.0,
+    "abtem_slice_thickness_angstrom": 1.0,
+    "abtem_sampling_angstrom": null
+  },
+  "noise": {
+    "model": "raw-range scaling plus zero-mean Gaussian noise",
+    "random_seed": 21
+  },
+  "preprocessing": {
+    "stage1_preprocess_stack": true,
+    "window_size": 1
+  }
+}

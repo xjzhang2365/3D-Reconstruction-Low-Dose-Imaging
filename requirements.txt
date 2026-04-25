@@ -1,0 +1,14 @@
+# Core numerical stack
+numpy==2.1.3
+scipy==1.15.3
+
+# Imaging and visualization
+scikit-image==0.25.0
+matplotlib==3.10.0
+tifffile==2025.2.18
+
+# Optional denoising / simulation backends
+# Uncomment only when the corresponding workflow is needed.
+# bm3d==4.0.3
+# ase==3.28.0
+# abTEM==1.0.9
