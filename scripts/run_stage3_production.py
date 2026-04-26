@@ -44,20 +44,15 @@ def load_ground_truth(pdb_path: Path) -> np.ndarray | None:
 
 
 def _resolve_target(repo_root: Path) -> np.ndarray:
-    candidates = [
-        repo_root / "outputs" / "preprocessing" / "preprocessed_frame2.tif",
-        repo_root / "outputs" / "preprocessing" / "preprocessed_frame21.tif",
-        repo_root / "data" / "simulated" / "target_preprocessed_like_raw21.npy",
-    ]
-    for p in candidates:
-        if p.exists():
-            print(f"  Target image: {p}")
-            if p.suffix == ".npy":
-                return np.load(p)
-            import tifffile
-            return tifffile.imread(p).astype(np.float64)
+    # Use the same target as the verified benchmark (run_stage3_paper_aligned.py).
+    # This 256x256 NPY was generated at pixel_size=0.456 A/px and is the target
+    # against which chi2 improvements were verified.
+    p = repo_root / "data" / "simulated" / "target_preprocessed_like_raw21.npy"
+    if p.exists():
+        print(f"  Target image: {p}")
+        return np.load(str(p)).astype(np.float32)
     raise FileNotFoundError(
-        "No preprocessed target found. Run scripts/run_preprocessing.py first."
+        f"Target not found: {p}\nRun scripts/generate_simulated_target.py first."
     )
 
 
@@ -100,8 +95,10 @@ def main():
     if args.resume:
         print(f"  mode: RESUME from {args.checkpoint_dir}")
 
+    # pixel_size=0.456 A matches the target image and the verified benchmark config.
+    # step_size_z=0.0: chi2 is z-blind at 80 kV; z improves only via LAMMPS bond geometry.
     sim = AbtemSimulator(
-        pixel_size_ang=0.183,
+        pixel_size_ang=0.456,
         image_shape=target.shape,
         defocus_ang=-80.0,
         slice_thickness=1.0,
@@ -112,10 +109,10 @@ def main():
         max_inner_steps=args.max_inner,
         T_final_fraction=0.01,
         step_size_xy_ang=0.08,
-        step_size_z_ang=0.15,
+        step_size_z_ang=0.0,
         md_mode=args.md_mode,
-        lammps_max_displacement_angstrom=0.5,
-        outer_tol=1e-5,
+        lammps_max_displacement_angstrom=0.05,
+        outer_tol=0.0,
     )
     if args.md_mode == "lammps":
         if not args.lammps_exe:
