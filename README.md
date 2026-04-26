@@ -115,6 +115,8 @@ A 4-outer × 400-inner production run on the simulated 640-atom dataset, with ab
 
 ![Stage 3 production run convergence](docs/images/stage3_production_convergence.png)
 
+*(vector PDF version: [stage3_production_convergence.pdf](docs/images/stage3_production_convergence.pdf))*
+
 | Metric                    | Initial | Final  | Paper target |
 | :------------------------ | ------: | -----: | -----------: |
 | χ²                        |  1.9974 | 1.9885 |       129.0  |
