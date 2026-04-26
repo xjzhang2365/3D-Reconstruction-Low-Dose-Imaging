@@ -7,7 +7,7 @@ Physics-informed inverse-problem pipeline for reconstructing 3D atomic coordinat
 
 **Paper:** [Physics-Informed 3D Atomic Reconstruction and Dynamics of Free-Standing Graphene from Single Low-Dose TEM Images](https://arxiv.org/abs/2604.07271) (arXiv:2604.07271). Reported accuracy: **σ_z = 0.45 Å** out-of-plane, at 8×10³ e⁻/Å² dose and 1 ms temporal resolution.
 
-**Current repository status:** Paper-aligned implementation architecturally verified on the 636-atom simulated graphene validation case. All components (abTEM forward simulator, two-level SA with auto-calibrated temperature, LAMMPS per-candidate MD projector, ground-truth frame alignment) confirmed functioning with monotonic z-RMSD reduction. Longer production runs required to reach paper-level accuracy. See [Benchmark Results](#benchmark-results) and [`docs/benchmark_report.md`](docs/benchmark_report.md) for full analysis.
+**Current repository status:** Paper-aligned implementation with 30-outer × 400-inner production run completed. All components confirmed functioning: z-RMSD decreases from 1.3932 Å to 1.3784 Å with 0 MD failures. Remaining gap to paper's 0.45 Å requires a longer annealing schedule (≥2000 inner steps/outer) and NVT equilibration in LAMMPS. See [Benchmark Results](#benchmark-results) and [`docs/benchmark_report.md`](docs/benchmark_report.md) for full analysis.
 
 ---
 
@@ -109,18 +109,20 @@ Validated on the 640-atom simulated graphene reference:
 
 Stage 2 provides the initial 3D model passed to Stage 3. The 1.393 Å z-RMSD is the **initialization** error; Stage 3 is designed to reduce it. Zero extras confirm the amplitude-based ghost rejection in the Gaussian refinement pass is working as intended. The 72 missing atoms are in interior defect regions where single-frame SNR falls below the 2D-Gaussian-fitting threshold (~2σ); see Known Limitations.
 
-### Stage 3 Paper-Aligned (Architecture Verification)
+### Stage 3 Paper-Aligned (Production Run)
 
-Verified on a 3 outer × 200 inner benchmark on the 636-atom case, with abTEM multislice forward simulation and per-candidate LAMMPS relaxation:
+Full 30-outer × 400-inner production run on the 568-atom simulated validation case, with abTEM multislice forward simulation and per-candidate LAMMPS energy minimization:
 
-| Metric                    |    Initial  |      Final  |   Change  |
-| :------------------------ | ----------: | ----------: | --------: |
-| χ²                        |    2.0017   |    1.9978   |   −0.20%  |
-| z-RMSD (Å)                |    1.4218   |    1.4130   |   −0.62%  |
-| Mean nearest-neighbor (Å) |       —     |    1.4067   |      —    |
-| MD relaxation failures    |       —     |    0 / 600  |     0%    |
+![Stage 3 production run convergence](docs/images/stage3_convergence.png)
 
-**Interpretation:** z-RMSD decreased monotonically. All architectural components are confirmed working — the per-candidate MD projector correctly enforces graphene bond geometry (mean NN distance 1.41 Å, matching the 1.42 Å equilibrium) without fighting the image-matching objective (χ² non-increasing). The 0.009 Å per-outer improvement scales linearly with iteration count; extrapolation indicates the paper's σ_z = 0.45 Å target is reachable with a ~30 outer production run. Full analysis in [`docs/benchmark_report.md`](docs/benchmark_report.md).
+| Metric                    |    Initial  |      Final  | Paper target |
+| :------------------------ | ----------: | ----------: | -----------: |
+| χ²                        |    1.9974   |    1.9885   |           —  |
+| z-RMSD (Å)                |    1.3932   |    1.3784   |         0.45 |
+| Mean nearest-neighbor (Å) |       —     |    1.4080   |         1.42 |
+| MD relaxation failures    |       —     |  0 / 1600   |            0 |
+
+**Interpretation:** z-RMSD reduced from 1.3932 Å to 1.3784 Å. The architecture drives monotonic χ² reduction and C–C bond geometry is preserved (mean NN 1.41 Å, matching equilibrium 1.42 Å). SA converges after the first outer iteration — subsequent outers show zero acceptance, indicating the local minimum is reached quickly under the current 400-step annealing schedule. Closing the remaining gap to 0.45 Å requires a longer annealing schedule (more inner steps per outer) and NVT equilibration in LAMMPS — see Known Limitations. Full analysis in [`docs/benchmark_report.md`](docs/benchmark_report.md).
 
 ---
 
@@ -308,14 +310,14 @@ pip install -r requirements.txt
 
 - Stage 1 preprocessing reproduces the paper's input conditioning.
 - Stage 2 matches 568 / 640 atoms on the simulated validation case with 0 extras and xy RMSE = 0.62 px (0.11 Å). Amplitude-based ghost rejection in the Gaussian refinement pass eliminates false positives.
-- Stage 3 paper-aligned mode: χ² non-increasing and z-RMSD monotonically decreasing on the validation case; C–C bond geometry preserved by LAMMPS projection (mean NN = 1.41 Å).
+- Stage 3 paper-aligned mode: χ² non-increasing and z-RMSD monotonically decreasing on the validation case; C–C bond geometry preserved by LAMMPS projection (mean NN = 1.41 Å). Production run (30 outer × 400 inner) completed: z-RMSD 1.3932 → 1.3784 Å, 0 MD failures.
 - abTEM forward simulator: single-atom z-sensitivity of ~5×10⁻³ % per Å, correct sign, stable across runs.
 - Stage 2 Gaussian refinement infrastructure: per-atom sub-pixel fitting with amplitude-based ghost rejection and lattice-completion recovery. Modest numeric gain on current case (removes 2 ghost atoms), primarily useful infrastructure for higher-dose data or improved denoising.
 
 ### Known limitations
 
 - **Stage 2 detection is SNR-limited.** At 8×10³ e⁻/Å² the per-atom peak SNR is approximately 0.2–0.5, below the ~2 threshold at which 2D Gaussian centroiding is reliable. On the simulated validation case this produces 568/640 atoms matched with 0 extras and 72 missing (xy RMSE 0.62 px ≈ 0.11 Å). The missing atoms cluster in interior defect regions; the Gaussian refiner operates in ghost-rejection-only mode (`refine_position=False`) to avoid drifting to noise features. The paper's StatSTEM-style multi-Gaussian fitting was performed in MATLAB with per-image calibration and is not reproduced here.
-- Stage 3: the paper's σ_z = 0.45 Å target has not yet been demonstrated on a long production run in this repository. Current verification is a 3×200 smoke test confirming architecture correctness and monotonic z-RMSD reduction. A production run (~30 outer iterations) is required to reach paper-level accuracy.
+- **Stage 3 σ_z gap.** The 30-outer production run reached z-RMSD = 1.3784 Å (initial 1.3932 Å, paper target 0.45 Å). SA converges to a local minimum after the first outer iteration under the 400-step/outer annealing schedule (accept = 0% for outers 1+). Closing the gap requires: (1) a longer inner schedule (≥2000 steps/outer with proportionally smaller T_final_fraction), (2) NVT equilibration in LAMMPS (Nosé–Hoover, 300–1000 K, 50 ps) as specified in the paper's Methods, and (3) Stobbs-factor calibration of the z-initialization.
 - Stage 2 PCD z-initialization does not include Stobbs-factor calibration from a bilayer reference region.
 - LAMMPS coupling uses energy minimization only (maxiter=5000). The paper's Methods specify additional NVT equilibration (Nosé–Hoover, 300–1000 K, 50 ps, trajectory-averaged coordinates). NVT is not yet implemented.
 
