@@ -275,19 +275,28 @@ class AbtemSimulator:
         return arr
 
     def _match_shape(self, arr: np.ndarray, H: int, W: int) -> np.ndarray:
-        """Crop center or pad with mean to match target shape."""
+        """Crop or pad each axis independently to match target shape."""
         ah, aw = arr.shape
-        # Crop center
-        if ah >= H and aw >= W:
+        # Handle height
+        if ah > H:
             r0 = (ah - H) // 2
+            arr = arr[r0:r0+H, :]
+        elif ah < H:
+            pad = np.full((H, aw), arr.mean(), dtype=np.float32)
+            r0 = (H - ah) // 2
+            pad[r0:r0+ah, :] = arr
+            arr = pad
+        # Handle width
+        ah, aw = arr.shape
+        if aw > W:
             c0 = (aw - W) // 2
-            return arr[r0:r0+H, c0:c0+W]
-        # Pad if smaller
-        out = np.full((H, W), arr.mean(), dtype=np.float32)
-        r0 = (H - ah) // 2
-        c0 = (W - aw) // 2
-        out[r0:r0+ah, c0:c0+aw] = arr
-        return out
+            arr = arr[:, c0:c0+W]
+        elif aw < W:
+            pad = np.full((H, W), arr.mean(), dtype=np.float32)
+            c0 = (W - aw) // 2
+            pad[:, c0:c0+aw] = arr
+            arr = pad
+        return arr
 
     def chi2(self, positions_ang: np.ndarray,
              target_image: np.ndarray) -> float:
