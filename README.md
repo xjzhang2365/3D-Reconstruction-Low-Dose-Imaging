@@ -321,18 +321,6 @@ pip install -r requirements.txt
 
 ---
 
-## Citation
-
-```bibtex
-@article{zhang2026physics,
-  title   = {Physics-Informed 3D Atomic Reconstruction and Dynamics of
-             Free-Standing Graphene from Single Low-Dose TEM Images},
-  author  = {Zhang, Xiaojun and Hung, Shih-Wei and Wu, Yawei and Chou, Jyh-Pin
-             and Kirkland, Angus I. and Kilaas, Roar and Chen, Fu-Rong},
-  journal = {arXiv preprint arXiv:2604.07271},
-  year    = {2026},
-}
-```
 
 ## License and Contact
 
