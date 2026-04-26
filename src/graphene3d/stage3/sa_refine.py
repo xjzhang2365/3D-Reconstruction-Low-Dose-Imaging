@@ -48,6 +48,7 @@ from pathlib import Path
 from typing import Any, Callable, Optional, Protocol
 import json
 import shutil
+import signal
 import subprocess
 
 import numpy as np
@@ -1849,6 +1850,72 @@ def calibrate_initial_temperature(
     return T0
 
 
+class GracefulShutdown:
+    """Set triggered=True on SIGINT/SIGTERM so the outer loop can checkpoint before exit."""
+    triggered = False
+
+    def __init__(self):
+        signal.signal(signal.SIGINT, self.handle)
+        signal.signal(signal.SIGTERM, self.handle)
+
+    def handle(self, signum, frame):
+        print(f"\n  Received signal {signum}, will save checkpoint and exit")
+        GracefulShutdown.triggered = True
+
+
+def save_sa_checkpoint(checkpoint_dir, outer_iter, positions, history, config, rng_state):
+    """Save full SA state after each outer iteration."""
+    checkpoint_dir = Path(checkpoint_dir)
+    checkpoint_dir.mkdir(parents=True, exist_ok=True)
+    np.savez(
+        checkpoint_dir / f"checkpoint_outer_{outer_iter:03d}.npz",
+        positions=positions,
+        outer_iter=outer_iter,
+        history_chi2=np.array(history['chi2']),
+        history_z_rmsd=np.array(
+            [v if v is not None else np.nan for v in history['z_rmsd']]
+        ),
+        history_acceptance=np.array(history['acceptance']),
+        history_n_md_calls=np.array(history['n_md_calls']),
+        history_n_md_failures=np.array(history['n_md_failures']),
+        rng_state=np.array(rng_state, dtype=object),
+    )
+    config_path = checkpoint_dir / "config.json"
+    if not config_path.exists():
+        config_path.write_text(json.dumps(
+            {k: str(v) for k, v in config.items()}, indent=2
+        ))
+
+
+def load_sa_checkpoint(checkpoint_dir):
+    """Load most recent checkpoint. Returns None if no checkpoints exist."""
+    checkpoint_dir = Path(checkpoint_dir)
+    if not checkpoint_dir.exists():
+        return None
+    files = sorted(checkpoint_dir.glob("checkpoint_outer_*.npz"))
+    if not files:
+        return None
+    latest = files[-1]
+    data = np.load(latest, allow_pickle=True)
+    history = {
+        'outer_iter': list(range(int(data['outer_iter']) + 1)),
+        'chi2': data['history_chi2'].tolist(),
+        'z_rmsd': [None if np.isnan(v) else float(v)
+                   for v in data['history_z_rmsd']],
+        'acceptance': data['history_acceptance'].tolist(),
+        'n_md_calls': data['history_n_md_calls'].tolist(),
+        'n_md_failures': data['history_n_md_failures'].tolist(),
+    }
+    print(f"  Loaded checkpoint from {latest}")
+    print(f"  Resuming from outer iteration {int(data['outer_iter']) + 1}")
+    return {
+        'positions': data['positions'],
+        'outer_iter': int(data['outer_iter']),
+        'history': history,
+        'rng_state': data['rng_state'],
+    }
+
+
 def make_paper_aligned_config(
     simulator_kind: str = 'abtem',
     md_mode: str = 'none',
@@ -1949,6 +2016,9 @@ def run_sa_refinement_paper_aligned(
     simulator,
     md_relaxer=None,
     ground_truth: np.ndarray = None,
+    checkpoint_dir: str = None,
+    resume: bool = False,
+    save_every_n_outer: int = 1,
 ):
     """
     Two-level SA+MD refinement matching paper Figure 8 structure.
@@ -2012,16 +2082,30 @@ def run_sa_refinement_paper_aligned(
         'outer_iter': [], 'chi2': [], 'z_rmsd': [],
         'acceptance': [], 'n_md_calls': [], 'n_md_failures': [],
     }
+    start_outer = 0
+
+    if resume and checkpoint_dir is not None:
+        ckpt = load_sa_checkpoint(checkpoint_dir)
+        if ckpt is not None:
+            positions = ckpt['positions']
+            start_outer = ckpt['outer_iter'] + 1
+            history = ckpt['history']
+            rng_state = ckpt['rng_state'].item() if hasattr(ckpt['rng_state'], 'item') else ckpt['rng_state']
+            np.random.set_state(rng_state)
+
+    shutdown = GracefulShutdown()
 
     print(f"\nStarting SA+MD refinement: {max_outer} outer x {max_inner} inner")
     print(f"initial T0 = {T0:.3e}, alpha = {alpha:.6f}, "
           f"step_xy = {step_xy}A, step_z = {step_z}A")
+    if start_outer > 0:
+        print(f"  Resuming from outer iteration {start_outer}")
 
     chi2_init = simulator.chi2(positions, target_image)
     print(f"Initial chi2 = {chi2_init:.6f}, "
           f"initial z-RMSD = {z_rmsd(positions, ground_truth)}")
 
-    for outer in range(max_outer):
+    for outer in range(start_outer, max_outer):
         n_accepted = 0
         n_md_calls = 0
         n_md_fail  = 0
@@ -2087,6 +2171,17 @@ def run_sa_refinement_paper_aligned(
         print(f"  outer {outer}: chi2={chi2_outer:.6f}, z_rmsd={z_str}A, "
               f"accept={acceptance:.2f}, T0={T0_outer:.3e}, "
               f"md={n_md_calls}/{n_md_fail}fail")
+
+        if checkpoint_dir is not None and (outer + 1) % save_every_n_outer == 0:
+            save_sa_checkpoint(
+                checkpoint_dir, outer, positions, history, config,
+                np.random.get_state(),
+            )
+            print(f"  Checkpoint saved (outer={outer})")
+
+        if shutdown.triggered:
+            print(f"  Graceful shutdown after outer iter {outer}")
+            break
 
         if outer > 0:
             delta_outer = abs(history['chi2'][-1] - history['chi2'][-2])
