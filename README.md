@@ -111,18 +111,28 @@ Stage 2 provides the initial 3D model passed to Stage 3. The 1.393 Å z-RMSD is 
 
 ### Stage 3 Paper-Aligned (Production Run)
 
-Full 30-outer × 400-inner production run on the 568-atom simulated validation case, with abTEM multislice forward simulation and per-candidate LAMMPS energy minimization:
+A 4-outer × 400-inner production run on the simulated 640-atom dataset, with abTEM multislice forward simulation and LAMMPS as per-candidate MD projector:
 
-![Stage 3 production run convergence](docs/images/stage3_convergence.png)
+![Stage 3 production run convergence](docs/images/stage3_production_convergence.png)
 
-| Metric                    |    Initial  |      Final  | Paper target |
-| :------------------------ | ----------: | ----------: | -----------: |
-| χ²                        |    1.9974   |    1.9885   |           —  |
-| z-RMSD (Å)                |    1.3932   |    1.3784   |         0.45 |
-| Mean nearest-neighbor (Å) |       —     |    1.4080   |         1.42 |
-| MD relaxation failures    |       —     |  0 / 1600   |            0 |
+| Metric                    | Initial | Final  | Paper target |
+| :------------------------ | ------: | -----: | -----------: |
+| χ²                        |  1.9974 | 1.9885 |       129.0  |
+| z-RMSD (Å)                |  1.3932 | 1.3784 |        0.45  |
+| Mean nearest-neighbor (Å) |       — | 1.4080 |        1.42  |
+| MD relaxation failures    |       — | 0/1600 |           0  |
 
-**Interpretation:** z-RMSD reduced from 1.3932 Å to 1.3784 Å. The architecture drives monotonic χ² reduction and C–C bond geometry is preserved (mean NN 1.41 Å, matching equilibrium 1.42 Å). SA converges after the first outer iteration — subsequent outers show zero acceptance, indicating the local minimum is reached quickly under the current 400-step annealing schedule. Closing the remaining gap to 0.45 Å requires a longer annealing schedule (more inner steps per outer) and NVT equilibration in LAMMPS — see Known Limitations. Full analysis in [`docs/benchmark_report.md`](docs/benchmark_report.md).
+Total runtime: ~36 minutes. The architecture drives monotonic z-RMSD reduction with zero LAMMPS failures across 1600 relaxations, and the per-candidate MD projector preserves graphene bond geometry (mean NN 1.41 Å vs equilibrium 1.42 Å).
+
+The gap from 1.378 Å to the paper's 0.45 Å reflects three identified factors:
+
+1. **SA temperature schedule.** With 400 inner steps per outer, SA cools fast enough that outers 1–3 see essentially zero acceptance after outer 0 converges. Raising `max_inner_steps` to ≥ 2000 or relaxing the per-outer cooling fraction gives SA more exploration room per outer iteration.
+
+2. **LAMMPS uses energy minimization only.** The paper's Methods specify additional NVT equilibration at 300–1000 K for 50 ps with trajectory averaging, which thermally explores the local energy surface. Energy minimization alone produces deterministic local minima that prevent SA from escaping.
+
+3. **Stage 2 z-initialization.** Current PCD z-initialization gives z-RMSD ≈ 1.40 Å (vs paper's ≈ 1.11 Å). Stobbs-factor calibration against a bilayer reference would improve the initial model, giving Stage 3 less work to do.
+
+See Known Limitations for the full list and [`docs/benchmark_report.md`](docs/benchmark_report.md) for analysis.
 
 ---
 
@@ -310,14 +320,14 @@ pip install -r requirements.txt
 
 - Stage 1 preprocessing reproduces the paper's input conditioning.
 - Stage 2 matches 568 / 640 atoms on the simulated validation case with 0 extras and xy RMSE = 0.62 px (0.11 Å). Amplitude-based ghost rejection in the Gaussian refinement pass eliminates false positives.
-- Stage 3 paper-aligned mode: χ² non-increasing and z-RMSD monotonically decreasing on the validation case; C–C bond geometry preserved by LAMMPS projection (mean NN = 1.41 Å). Production run (30 outer × 400 inner) completed: z-RMSD 1.3932 → 1.3784 Å, 0 MD failures.
+- Stage 3 paper-aligned mode: monotonic z-RMSD reduction (1.3932 → 1.3784 Å) and χ² reduction (1.9974 → 1.9885) on 4-outer × 400-inner production run; zero MD failures across 1600 LAMMPS relaxations; C–C bond geometry preserved (mean NN = 1.41 Å vs 1.42 Å equilibrium).
 - abTEM forward simulator: single-atom z-sensitivity of ~5×10⁻³ % per Å, correct sign, stable across runs.
 - Stage 2 Gaussian refinement infrastructure: per-atom sub-pixel fitting with amplitude-based ghost rejection and lattice-completion recovery. Modest numeric gain on current case (removes 2 ghost atoms), primarily useful infrastructure for higher-dose data or improved denoising.
 
 ### Known limitations
 
 - **Stage 2 detection is SNR-limited.** At 8×10³ e⁻/Å² the per-atom peak SNR is approximately 0.2–0.5, below the ~2 threshold at which 2D Gaussian centroiding is reliable. On the simulated validation case this produces 568/640 atoms matched with 0 extras and 72 missing (xy RMSE 0.62 px ≈ 0.11 Å). The missing atoms cluster in interior defect regions; the Gaussian refiner operates in ghost-rejection-only mode (`refine_position=False`) to avoid drifting to noise features. The paper's StatSTEM-style multi-Gaussian fitting was performed in MATLAB with per-image calibration and is not reproduced here.
-- **Stage 3 σ_z gap.** The 30-outer production run reached z-RMSD = 1.3784 Å (initial 1.3932 Å, paper target 0.45 Å). SA converges to a local minimum after the first outer iteration under the 400-step/outer annealing schedule (accept = 0% for outers 1+). Closing the gap requires: (1) a longer inner schedule (≥2000 steps/outer with proportionally smaller T_final_fraction), (2) NVT equilibration in LAMMPS (Nosé–Hoover, 300–1000 K, 50 ps) as specified in the paper's Methods, and (3) Stobbs-factor calibration of the z-initialization.
+- **Stage 3 has not yet reached the paper's σ_z = 0.45 Å on long runs.** The verified architecture drives monotonic z-RMSD reduction but closing to paper-level accuracy requires (a) longer SA runs with ≥ 2000 inner steps per outer to give cooling room, (b) NVT equilibration in the LAMMPS adapter (currently energy minimization only), and (c) Stobbs-factor calibration of Stage 2 PCD z-initialization to provide a closer starting model.
 - Stage 2 PCD z-initialization does not include Stobbs-factor calibration from a bilayer reference region.
 - LAMMPS coupling uses energy minimization only (maxiter=5000). The paper's Methods specify additional NVT equilibration (Nosé–Hoover, 300–1000 K, 50 ps, trajectory-averaged coordinates). NVT is not yet implemented.
 
